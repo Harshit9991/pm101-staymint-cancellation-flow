@@ -6,15 +6,17 @@ Live prototype: https://staymint-prototype.vercel.app
 
 ## In this repo
 
+Already here: this README, `problem-statement.md` (the assignment brief, verbatim) and `staymint-prototype.html` (the clickable prototype as a single self-contained file - open in any browser, or use the live link above).
+
+Being added now (upload in progress):
+
 | File | What it is |
 | --- | --- |
-| `problem-statement.md` | The assignment brief, verbatim |
 | `PM101_Staymint_Cancellation_Wireframes_v2.pptx` | Final 13-slide submission deck (editable source) |
 | `PM101_Staymint_Cancellation_Wireframes_v2.pdf` | The same deck as a PDF |
 | `PM101_Staymint_Flow_Diagrams.pdf` | The four flow diagrams on their own (slides 2-5) |
 | `flow-1-customer-journey-part1.png`, `flow-2-customer-journey-part2.png` | Customer swimlane: Customer / Our app / Agoda |
 | `flow-3-technical-shadow-part1.png`, `flow-4-technical-shadow-part2.png` | Technical shadow: Customer / Android UI / Our backend / Agoda API, same step IDs with the data passed per step |
-| `staymint-prototype.html` | Clickable prototype, single self-contained file - open in any browser, or use the live link above |
 
 ## What the deck covers
 
