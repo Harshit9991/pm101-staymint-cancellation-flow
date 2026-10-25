@@ -6,23 +6,19 @@ Live prototype: https://staymint-prototype.vercel.app
 
 ## In this repo
 
-Already here: this README, `problem-statement.md` (the assignment brief, verbatim) and `staymint-prototype.html` (the clickable prototype as a single self-contained file - open in any browser, or use the live link above).
-
-Not uploaded yet - GitHub's web upload kept failing, so these binaries are being added separately. Meanwhile the final deck is in Google Drive: https://drive.google.com/file/d/1hNGiEasd4CsJDYg_sTgZtSZ_cp86jiB5/view
-
 | File | What it is |
 | --- | --- |
-| `PM101_Staymint_Cancellation_Wireframes_v2.pptx` | Final 13-slide submission deck (editable source) |
-| `PM101_Staymint_Cancellation_Wireframes_v2.pdf` | The same deck as a PDF |
-| `PM101_Staymint_Flow_Diagrams.pdf` | The four flow diagrams on their own (slides 2-5) |
-| `flow-1-customer-journey-part1.png`, `flow-2-customer-journey-part2.png` | Customer swimlane: Customer / Our app / Agoda |
-| `flow-3-technical-shadow-part1.png`, `flow-4-technical-shadow-part2.png` | Technical shadow: Customer / Android UI / Our backend / Agoda API, same step IDs with the data passed per step |
+| `PM101_Staymint_Cancellation_Wireframes_v5.pptx` | Final 14-slide submission deck (editable source) |
+| `PM101_Staymint_Cancellation_Wireframes_v5.pdf` | The same deck as a PDF (rendered with LibreOffice, so fonts may differ slightly from Google Slides) |
+| `PM101_Staymint_Flow_Diagrams_v5.pdf` | The four flow diagrams on their own (deck slides 4-7) |
+| `staymint-prototype.html` | The clickable prototype as a single self-contained file - open in any browser, or use the live link above |
+| `problem-statement.md` | The assignment brief, verbatim |
 
 ## What the deck covers
 
+- A 2-page product note with the reasoning, the India refund problem size and the hotel room-night point, each with cited sources (source page at the end of the deck)
 - The customer cancellation journey as a swimlane, plus a matching technical shadow showing API calls and data handoffs
-- 7 wireframe screens, each with Designer (UI/UX), Developer (API usage) and Business notes
-- A 2-page product note with the reasoning and stated assumptions
+- 5 wireframe screens, each with Designer (UI/UX), Developer (API usage) and Business notes
 - A clickable prototype with reviewer demo scenarios
 
 ## Stated assumptions
