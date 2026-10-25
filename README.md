@@ -8,7 +8,7 @@ Live prototype: https://staymint-prototype.vercel.app
 
 Already here: this README, `problem-statement.md` (the assignment brief, verbatim) and `staymint-prototype.html` (the clickable prototype as a single self-contained file - open in any browser, or use the live link above).
 
-Being added now (upload in progress):
+Not uploaded yet - GitHub's web upload kept failing, so these binaries are being added separately. Meanwhile the final deck is in Google Drive: https://drive.google.com/file/d/1hNGiEasd4CsJDYg_sTgZtSZ_cp86jiB5/view
 
 | File | What it is |
 | --- | --- |
