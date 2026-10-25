@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Staymint - Hotel Booking Cancellation Experience</title>
+<!-- Tailwind CSS v3 CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Cormorant Garamond & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              ivory: '#FAF6EF',
+              ivoryAlt: '#F3EFE7',
+              deep: '#0B3D36',
+              deepHover: '#072b26',
+              teal: '#0E7C74',
+              mint: '#CDEAE4',
+              border: '#E3DCce',
+              charcoal: '#1A211E',
+              subtle: '#626C66'
+            },
+            status: {
+              brick: '#C62828',
+              brickBg: '#FDF0EE',
+              brickBorder: '#F8CECA',
+              amber: '#B45309',
+              amberBg: '#FEF3C7',
+              amberBorder: '#FDE68A'
+            }
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
+          },
+          boxShadow: {
+            device: '0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 12px #262c28, 0 0 0 14px #121614',
+            softCard: '0 2px 8px -2px rgba(11, 61, 54, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.04)'
+          }
+        }
+      }
+    };
+  </script>
+<style data-purpose="base-resets">
+    /* Custom Scrollbar for Phone Container */
+    .mobile-screen-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .mobile-screen-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .mobile-screen-scroll::-webkit-scrollbar-thumb {
+      background: #D9D2C5;
+      border-radius: 4px;
+    }
+    .mobile-screen-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #D9D2C5 transparent;
+    }
+    
+    /* Device screen dimensions constraint */
+    .android-viewport {
+      width: 412px;
+      height: 915px;
+    }
+
+    /* Reviewer fit: scale handset to viewport (desktop), dissolve frame (mobile) */
+    #phone-scaler { width: 100%; display: flex; justify-content: center; }
+    #phone-scaler > .android-viewport { transform-origin: top center; }
+    @media (max-width: 560px) {
+      html, body { height: 100dvh; }
+      body { padding: 0 !important; overflow: hidden !important; }
+      header { margin-bottom: 0 !important; gap: 8px !important; padding: 10px 10px 8px !important; }
+      #scenario-selector-container { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; }
+      #scenario-selector-container button { white-space: nowrap !important; font-size: 10px !important; padding: 6px 8px !important; }
+      header h1 { font-size: 13px !important; }
+      header h1 span { display: none !important; }
+      header p { display: none !important; }
+      #reset-scenario-btn { padding: 6px 10px !important; font-size: 10px !important; white-space: nowrap !important; }
+      #current-scenario-indicator { font-size: 10px !important; }
+      #phone-scaler { flex: 1; min-height: 0; display: block; }
+      .android-viewport { width: 100% !important; height: 100% !important; border: 0 !important; border-radius: 0 !important; }
+    }
+
+    /* Interactive button ripple/tap animation */
+    .touch-press {
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
+    }
+    .touch-press:active {
+      transform: scale(0.975);
+      opacity: 0.92;
+    }
+
+    /* Screen transition fade */
+    .screen-view {
+      transition: opacity 0.22s ease-in-out, transform 0.22s ease-out;
+    }
+    .screen-view.hidden-screen {
+      display: none !important;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    .screen-view.active-screen {
+      display: flex !important;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="bg-[#121614] text-slate-100 min-h-screen flex flex-col items-center justify-start py-6 px-3 lg:px-8 selection:bg-brand-mint selection:text-brand-deep font-sans antialiased overflow-x-hidden">
+<!-- BEGIN: PageBackgroundAura -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden -z-10 flex items-center justify-center opacity-40">
+<div class="w-[900px] h-[900px] rounded-full bg-gradient-to-tr from-brand-deep via-[#16352E] to-transparent blur-3xl"></div>
+</div>
+<!-- END: PageBackgroundAura -->
+<!-- BEGIN: TopReviewerPanel -->
+<header class="w-full max-w-6xl mb-6 flex flex-col items-center gap-3">
+<div class="flex items-center justify-between w-full px-2">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-brand-deep border border-brand-mint/30 flex items-center justify-center text-brand-mint font-serif font-bold text-lg">S</div>
+<div>
+<h1 class="text-base font-semibold tracking-wide text-zinc-100 flex items-center gap-2">
+            Staymint Prototype Reviewer
+            <span class="text-xs font-normal text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-full">Interactive v3.1</span>
+</h1>
+<p class="text-xs text-zinc-400 hidden sm:block">Test hotel cancellation state machine, timeout recoveries, and dynamic refund scenarios</p>
+</div>
+</div>
+<button class="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 flex items-center gap-1.5 transition-all shadow-sm active:scale-95" id="reset-scenario-btn" type="button">
+<svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        Reset Scenario
+      </button>
+</div>
+<!-- Scenario Switcher Pills -->
+<div class="w-full bg-[#18201C] p-2 rounded-2xl border border-zinc-800/90 shadow-lg">
+<div class="text-[11px] font-medium uppercase tracking-wider text-zinc-400 px-2 pb-1.5 flex items-center justify-between">
+<span>Synthetic Scenarios (Select to simulate):</span>
+<span class="text-brand-mint font-semibold capitalize text-xs tracking-normal" id="current-scenario-indicator">Scenario 1: Standard Success</span>
+</div>
+<div class="flex flex-wrap gap-1.5" id="scenario-selector-container">
+<button class="scenario-btn active-pill px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-brand-deep text-brand-mint border-brand-mint/40" data-scenario="1">1. Standard (Rs 21,240)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="2">2. Zero Refund (Rs 0)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="3">3. Updated Refund (Rs 16,990)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="4">4. Timeout Resolved (W4C → W5)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="5">5. Timeout Active (W4C → W6b)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="6">6. Timeout Unresolved (W4C → W6c)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="7">7. Preview Failure (W4A → W6a)</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="8">8. Already Cancelled</button>
+<button class="scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500" data-scenario="9">9. Cancellation Unavailable</button>
+</div>
+</div>
+</header>
+<!-- END: TopReviewerPanel -->
+<!-- BEGIN: AndroidDeviceFrame -->
+<div id="phone-scaler">
+<main class="relative android-viewport rounded-[44px] shadow-device bg-brand-ivory text-brand-charcoal overflow-hidden border-[7px] border-[#222824] flex flex-col select-none">
+<!-- BEGIN: AndroidStatusBar -->
+<div class="h-8 w-full bg-transparent flex items-center justify-between px-6 shrink-0 z-40 text-brand-charcoal text-xs font-semibold">
+<span class="text-[11px] tracking-tight" id="status-clock">10:42</span>
+<!-- Center Camera Cutout Hole -->
+<div class="w-3.5 h-3.5 rounded-full bg-[#101412] shadow-inner border border-zinc-800"></div>
+<div class="flex items-center gap-1.5">
+<!-- 5G icon -->
+<span class="text-[9px] font-bold">5G</span>
+<!-- Cellular bars SVG -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 13.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"></path></svg>
+<!-- Battery SVG -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24"><path d="M17 5v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h1.5a1.5 1.5 0 0 1 3 0H15a2 2 0 0 1 2 2zm-2 1h-6v12h6V6z"></path></svg>
+</div>
+</div>
+<!-- END: AndroidStatusBar -->
+<!-- BEGIN: ViewportScreenManager -->
+<div class="relative w-full flex-1 flex flex-col overflow-hidden bg-brand-ivory" id="screen-container">
+<!-- ============================================== -->
+<!-- SCREEN 1: W1 - MY BOOKINGS                     -->
+<!-- ============================================== -->
+<section class="screen-view active-screen w-full h-full flex-col overflow-y-auto mobile-screen-scroll bg-brand-ivory pb-8" data-purpose="w1-my-bookings" id="screen-w1">
+<!-- App Top Bar -->
+<div class="sticky top-0 bg-brand-ivory/95 backdrop-blur-sm z-20 px-5 pt-3 pb-3 border-b border-brand-border/60 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-serif font-bold text-2xl text-brand-deep tracking-tight">Staymint</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-brand-ivoryAlt border border-brand-border flex items-center justify-center text-xs font-semibold text-brand-deep">
+            AS
+          </div>
+</div>
+<div class="p-5 flex flex-col gap-5">
+<div>
+<h2 class="font-serif text-3xl font-bold text-brand-deep leading-tight">My bookings</h2>
+<p class="text-xs text-brand-subtle mt-0.5">Manage your stays, receipts, and reservations</p>
+</div>
+<!-- Section: Upcoming Stay -->
+<div class="space-y-2.5">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold tracking-wider uppercase text-brand-subtle">Upcoming reservation</span>
+<span class="text-[11px] text-brand-teal font-medium">1 booking</span>
+</div>
+<!-- Primary Azure Palms Card -->
+<div class="touch-press bg-white rounded-2xl border border-brand-border shadow-softCard overflow-hidden cursor-pointer group" id="w1-upcoming-card">
+<div class="relative h-44 w-full overflow-hidden bg-zinc-200">
+<img alt="Azure Palms Resort &amp; Spa" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AEtjO1Whnhec4bxsgvnTufSXPRyCzZ1CAvkemQ_AAZcoG5w1t6nyJFSJ7iId1os3eNfrUOExtGKaWGJP4_4aLqiz9A7kXCh0ZUzaG39mikSf8q8YN7VnpJQsh3R_jTV9WHueh_JZDE7dFc8NVRj-FRFjk-8ozPyRvVki5C13hZ42GUBw0uZWBML5nn2n6RlaynNtzcfH16YjdKztUujNurgMqsUrdFnNtwDNvPrTIlxmmO4FldIipNP28MicWE8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<!-- Status Chip -->
+<div class="absolute top-3 right-3">
+<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-mint text-brand-deep border border-brand-mint/80 shadow-sm flex items-center gap-1" id="w1-azure-status-chip">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-deep"></span>
+                    Confirmed
+                  </span>
+</div>
+<div class="absolute bottom-3 left-3 right-3 text-white">
+<p class="text-[11px] font-medium tracking-wide text-zinc-200 uppercase">Resort &amp; Spa • Baga, Goa</p>
+<h3 class="font-serif text-xl font-bold leading-tight">Azure Palms Resort &amp; Spa</h3>
+</div>
+</div>
+<div class="p-4 space-y-3">
+<div class="grid grid-cols-2 gap-2 text-xs border-b border-brand-border/60 pb-3">
+<div>
+<span class="text-brand-subtle block text-[11px]">Check-in</span>
+<span class="font-semibold text-brand-charcoal">Fri, 27 Nov 2026</span>
+</div>
+<div>
+<span class="text-brand-subtle block text-[11px]">Check-out</span>
+<span class="font-semibold text-brand-charcoal">Sun, 29 Nov 2026</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-xs pt-0.5">
+<div>
+<span class="text-brand-subtle block text-[11px]">Booking ID</span>
+<span class="font-mono font-medium text-brand-charcoal">80000610</span>
+</div>
+<div class="text-right">
+<span class="text-brand-subtle block text-[11px]">Total paid</span>
+<span class="font-semibold text-brand-deep text-sm">Rs 21,240</span>
+</div>
+</div>
+<div class="pt-1 flex items-center justify-between text-xs text-brand-teal font-medium">
+<span>View booking details &amp; cancellation</span>
+<svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Past Stays -->
+<div class="space-y-2.5 pt-2">
+<span class="text-xs font-semibold tracking-wider uppercase text-brand-subtle">Past stays</span>
+<!-- Past Booking Card: Silver Oaks -->
+<div class="touch-press bg-white/80 rounded-2xl border border-brand-border/80 shadow-softCard overflow-hidden cursor-pointer" id="w1-past-card">
+<div class="flex p-3 gap-3">
+<div class="w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-zinc-200">
+<img alt="Silver Oaks Heritage Villa" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Vo2VFesqDE2OecrsX3Zi5uH_rcdPdpzFeBU0l_oosLIygeGng-UoHuqK65myJIucz0pWoHxTkMvUGpzY5gxv1-uaDHD6ThdtctNIKxr-B9m6BLPl2lJB05vDMygoxO_qJ_dSz7DZK0NFkWAJTRlKnCL1M9wdYT0Zvr8z3CVe6y1YQJh8ZUBbrK40rb7hs9Ee1WQZqA-uNjGT-nFlK9haSdfLCc44Jf7M-zLIVDcqNxVrNL3gHEZMMPHPgL"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-0.5">
+<div>
+<div class="flex items-center justify-between gap-1">
+<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200">Cancelled</span>
+<span class="text-[10px] text-brand-subtle font-mono">#71192801</span>
+</div>
+<h4 class="font-serif font-bold text-base text-brand-charcoal mt-1 line-clamp-1">Silver Oaks Heritage Villa</h4>
+<p class="text-[11px] text-brand-subtle">Jaipur, Rajasthan</p>
+</div>
+<div class="text-[11px] text-brand-subtle flex items-center justify-between pt-1 border-t border-brand-border/40">
+<span>Oct 2026 • 2 nights</span>
+<span class="text-brand-deep font-medium">View summary →</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- SCREEN 2: W2 - BOOKING DETAILS                 -->
+<!-- ============================================== -->
+<section class="screen-view hidden-screen w-full h-full flex-col overflow-y-auto mobile-screen-scroll bg-brand-ivory pb-8" data-purpose="w2-booking-details" id="screen-w2">
+<!-- Top App Bar -->
+<div class="sticky top-0 bg-brand-ivory/95 backdrop-blur-sm z-20 px-4 py-3 border-b border-brand-border/70 flex items-center justify-between">
+<button aria-label="Back" class="touch-press p-2 -ml-2 rounded-full hover:bg-brand-ivoryAlt text-brand-deep" id="w2-back-btn" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+</button>
+<span class="font-medium text-sm text-brand-charcoal">Reservation Details</span>
+<div class="w-8"></div>
+</div>
+<div class="p-5 space-y-4">
+<!-- Property Header Card -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard overflow-hidden">
+<div class="h-40 w-full relative">
+<img alt="Hotel preview" class="w-full h-full object-cover" id="w2-hotel-image" src="https://lh3.googleusercontent.com/aida/AEtjO1Whnhec4bxsgvnTufSXPRyCzZ1CAvkemQ_AAZcoG5w1t6nyJFSJ7iId1os3eNfrUOExtGKaWGJP4_4aLqiz9A7kXCh0ZUzaG39mikSf8q8YN7VnpJQsh3R_jTV9WHueh_JZDE7dFc8NVRj-FRFjk-8ozPyRvVki5C13hZ42GUBw0uZWBML5nn2n6RlaynNtzcfH16YjdKztUujNurgMqsUrdFnNtwDNvPrTIlxmmO4FldIipNP28MicWE8"/>
+<div class="absolute top-3 right-3">
+<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-mint text-brand-deep border border-brand-mint shadow-sm" id="w2-status-pill">
+                  Confirmed
+                </span>
+</div>
+</div>
+<div class="p-4">
+<p class="text-xs text-brand-subtle uppercase tracking-wider" id="w2-hotel-location">Baga, Goa, India</p>
+<h2 class="font-serif text-2xl font-bold text-brand-deep mt-0.5" id="w2-hotel-name">Azure Palms Resort &amp; Spa</h2>
+<div class="flex items-center gap-2 mt-2 text-xs text-brand-subtle">
+<span>Confirmation: <strong class="font-mono text-brand-charcoal font-medium" id="w2-hotel-conf">R5180672169926001</strong></span>
+</div>
+</div>
+</div>
+<!-- Dynamic Banner Container for State Notifications -->
+<div class="hidden" id="w2-banner-container">
+<!-- Injected via JS based on scenario: Unavailable or Info -->
+</div>
+<!-- Stay Specifics Card -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-3.5">
+<h3 class="text-xs font-semibold text-brand-subtle uppercase tracking-wider">Stay &amp; Guest Details</h3>
+<div class="grid grid-cols-2 gap-3 text-xs pb-3 border-b border-brand-border/60">
+<div>
+<span class="text-brand-subtle block text-[11px]">Check-in</span>
+<span class="font-medium text-brand-charcoal text-xs" id="w2-checkin-val">Fri 27 Nov 2026</span>
+<span class="text-[10px] text-brand-subtle block">From 14:00</span>
+</div>
+<div>
+<span class="text-brand-subtle block text-[11px]">Check-out</span>
+<span class="font-medium text-brand-charcoal text-xs" id="w2-checkout-val">Sun 29 Nov 2026</span>
+<span class="text-[10px] text-brand-subtle block">Until 11:00</span>
+</div>
+</div>
+<div class="space-y-2 text-xs text-brand-charcoal">
+<div class="flex justify-between">
+<span class="text-brand-subtle">Room &amp; Guests:</span>
+<span class="font-medium" id="w2-room-val">1 room, Deluxe Sea View • 2 adults</span>
+</div>
+<div class="flex justify-between">
+<span class="text-brand-subtle">Primary Guest:</span>
+<span class="font-medium" id="w2-guest-val">Aarav Sharma</span>
+</div>
+<div class="flex justify-between">
+<span class="text-brand-subtle">Booking ID:</span>
+<span class="font-mono font-medium" id="w2-bookingid-val">80000610</span>
+</div>
+</div>
+</div>
+<!-- Payment Breakdown Card -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-2.5">
+<h3 class="text-xs font-semibold text-brand-subtle uppercase tracking-wider">Payment Summary</h3>
+<div class="flex justify-between text-xs text-brand-charcoal">
+<span class="text-brand-subtle">Accommodations (2 nights)</span>
+<span>Rs 18,000</span>
+</div>
+<div class="flex justify-between text-xs text-brand-charcoal">
+<span class="text-brand-subtle">Taxes and resort fees</span>
+<span>Rs 3,240</span>
+</div>
+<div class="pt-2 border-t border-brand-border/60 flex justify-between items-center text-sm">
+<span class="font-semibold text-brand-deep">Total Paid</span>
+<span class="font-bold text-brand-deep" id="w2-total-paid">Rs 21,240</span>
+</div>
+</div>
+<!-- Cancellation Policy Card / Active State -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-2" id="w2-policy-card">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-brand-teal shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<h3 class="text-xs font-semibold text-brand-deep uppercase tracking-wider">Cancellation Policy</h3>
+</div>
+<p class="text-xs text-brand-subtle leading-relaxed" id="w2-policy-text">
+              Free cancellation before Wed 25 Nov 2026, 23:59 (hotel local time). Cancellations after this time are not refundable.
+            </p>
+</div>
+<!-- Actions Area -->
+<div class="pt-2" id="w2-action-container">
+<button class="touch-press w-full py-3.5 px-4 rounded-xl bg-brand-deep hover:bg-brand-deepHover text-brand-mint font-semibold text-sm transition-colors shadow-md flex items-center justify-center gap-2" id="w2-start-cancel-btn" type="button">
+              Review cancellation
+            </button>
+</div>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- SCREEN 3: W3 - REVIEW CANCELLATION             -->
+<!-- ============================================== -->
+<section class="screen-view hidden-screen w-full h-full flex-col overflow-y-auto mobile-screen-scroll bg-brand-ivory pb-8" data-purpose="w3-review-cancellation" id="screen-w3">
+<!-- Top App Bar -->
+<div class="sticky top-0 bg-brand-ivory/95 backdrop-blur-sm z-20 px-4 py-3 border-b border-brand-border/70 flex items-center justify-between">
+<button class="touch-press p-2 -ml-2 rounded-full hover:bg-brand-ivoryAlt text-brand-deep" id="w3-back-btn" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+</button>
+<span class="font-medium text-sm text-brand-charcoal">Review Cancellation</span>
+<div class="w-8"></div>
+</div>
+<div class="p-5 space-y-4">
+<!-- Dynamic Notification Banner (e.g., for Updated terms) -->
+<div class="hidden" id="w3-alert-banner">
+<!-- Injected conditionally in Scenario 3 -->
+</div>
+<div>
+<h2 class="font-serif text-2xl font-bold text-brand-deep">Review cancellation terms</h2>
+<p class="text-xs text-brand-subtle mt-0.5">Azure Palms Resort &amp; Spa • 27 Nov – 29 Nov 2026</p>
+</div>
+<!-- Refund Card Container -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-5 space-y-3" id="w3-refund-card">
+<span class="text-xs font-semibold uppercase tracking-wider text-brand-subtle block">Calculated Refund</span>
+<div class="flex items-baseline justify-between">
+<div>
+<span class="text-3xl font-bold font-serif text-brand-deep" id="w3-refund-amount">Rs 21,240</span>
+<span class="text-xs text-emerald-700 block font-medium mt-0.5" id="w3-refund-subtext">100% of amount paid (Rs 21,240)</span>
+</div>
+</div>
+<!-- Zero refund explicit brick warning container -->
+<div class="hidden p-3 rounded-xl bg-status-brickBg border border-status-brickBorder text-xs text-status-brick flex items-start gap-2" id="w3-zero-warning">
+<svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span><strong>No refund.</strong> You will receive Rs 0 if you cancel this booking according to current hotel policy.</span>
+</div>
+<!-- Updated refund fee breakdown -->
+<div class="hidden text-xs text-brand-subtle border-t border-brand-border/60 pt-2.5 space-y-1" id="w3-fee-breakdown">
+<div class="flex justify-between"><span>Original payment</span><span>Rs 21,240</span></div>
+<div class="flex justify-between text-status-brick"><span>Cancellation charge</span><span>- Rs 4,250</span></div>
+<div class="flex justify-between font-semibold text-brand-deep pt-1 border-t border-brand-border/40">
+<span>Revised refund amount</span><span>Rs 16,990</span>
+</div>
+</div>
+</div>
+<!-- Reason for Cancellation (Single-select chips) -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-3">
+<span class="text-xs font-semibold uppercase tracking-wider text-brand-subtle block">Reason for cancellation (optional)</span>
+<div class="flex flex-wrap gap-2" id="w3-reason-chips-group">
+<button class="reason-chip px-3 py-2 rounded-xl text-xs border border-brand-border text-brand-charcoal hover:border-brand-teal transition-all text-left" type="button">Trip changed or postponed</button>
+<button class="reason-chip px-3 py-2 rounded-xl text-xs border border-brand-border text-brand-charcoal hover:border-brand-teal transition-all text-left" type="button">Found a lower price online</button>
+<button class="reason-chip px-3 py-2 rounded-xl text-xs border border-brand-border text-brand-charcoal hover:border-brand-teal transition-all text-left" type="button">Booking a different hotel</button>
+<button class="reason-chip px-3 py-2 rounded-xl text-xs border border-brand-border text-brand-charcoal hover:border-brand-teal transition-all text-left" type="button">Safety concerns</button>
+</div>
+</div>
+<!-- Bottom Action Buttons -->
+<div class="pt-2 space-y-2.5">
+<button class="touch-press w-full py-3.5 px-4 rounded-xl bg-status-brick text-white font-semibold text-sm transition-all shadow-md hover:bg-red-800 flex items-center justify-center" id="w3-confirm-cancel-btn" type="button">
+              Confirm cancellation
+            </button>
+<button class="touch-press w-full py-3 px-4 rounded-xl bg-brand-ivoryAlt hover:bg-brand-border/50 text-brand-deep font-semibold text-xs transition-colors border border-brand-border flex items-center justify-center" id="w3-keep-booking-btn" type="button">
+              Keep booking
+            </button>
+</div>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- SCREEN 4: W4 - PROGRESS SCREEN                 -->
+<!-- ============================================== -->
+<section class="screen-view hidden-screen w-full h-full flex-col justify-between p-6 bg-brand-ivory" data-purpose="w4-progress-screen" id="screen-w4">
+<div class="pt-4 flex justify-center">
+<span class="font-serif font-bold text-xl text-brand-deep">Staymint</span>
+</div>
+<div class="flex flex-col items-center text-center px-4 space-y-6">
+<!-- Animated Spinner -->
+<div class="relative w-20 h-20 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-4 border-brand-mint/40"></div>
+<div class="w-20 h-20 rounded-full border-4 border-transparent border-t-brand-deep animate-spin"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-8 h-8 rounded-full bg-brand-deep/10 flex items-center justify-center">
+<div class="w-3 h-3 rounded-full bg-brand-teal animate-pulse"></div>
+</div>
+</div>
+</div>
+<!-- Captions & Body -->
+<div class="space-y-2 max-w-xs">
+<h2 class="font-serif text-2xl font-bold text-brand-deep leading-snug" id="w4-caption">
+              Cancelling your booking...
+            </h2>
+<p class="text-xs text-brand-subtle leading-relaxed" id="w4-subbody">
+<!-- Dynamically populated or empty for Caption A/B -->
+</p>
+</div>
+</div>
+<!-- Optional Bottom Action Area for Timeout W4C -->
+<div class="w-full space-y-2 pb-4 hidden" id="w4-timeout-actions">
+<button class="touch-press w-full py-3 rounded-xl bg-brand-deep text-brand-mint text-xs font-semibold shadow" id="w4-back-bookings-btn" type="button">
+            Back to My bookings
+          </button>
+<button class="touch-press w-full py-2.5 rounded-xl bg-transparent text-brand-deep hover:bg-brand-ivoryAlt text-xs font-semibold border border-brand-border" id="w4-support-btn" type="button">
+            Contact support
+          </button>
+</div>
+<div class="h-10" id="w4-placeholder-footer"></div>
+</section>
+<!-- ============================================== -->
+<!-- SCREEN 5: W5 - CANCELLATION CONFIRMED          -->
+<!-- ============================================== -->
+<section class="screen-view hidden-screen w-full h-full flex-col overflow-y-auto mobile-screen-scroll bg-brand-ivory p-5 justify-between" data-purpose="w5-cancellation-confirmed" id="screen-w5">
+<div class="space-y-5 pt-3">
+<!-- Success Hero Icon -->
+<div class="flex flex-col items-center text-center space-y-3 pt-2">
+<div class="w-16 h-16 rounded-full bg-brand-mint/70 border border-brand-teal/30 flex items-center justify-center text-brand-deep">
+<svg class="w-9 h-9 text-brand-teal" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</div>
+<div>
+<span class="text-xs font-semibold uppercase tracking-wider text-brand-teal">Cancellation Successful</span>
+<h2 class="font-serif text-3xl font-bold text-brand-deep mt-0.5">Booking cancelled</h2>
+<p class="text-xs text-brand-subtle mt-1">Azure Palms Resort &amp; Spa • Goa</p>
+</div>
+</div>
+<!-- Refund Summary Box -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-3">
+<div class="flex justify-between items-baseline">
+<span class="text-xs font-semibold uppercase tracking-wider text-brand-subtle">Refund accepted</span>
+<span class="text-2xl font-bold font-serif text-brand-deep" id="w5-refund-amount">Rs 21,240</span>
+</div>
+<p class="text-xs text-brand-subtle leading-relaxed border-t border-brand-border/60 pt-2.5" id="w5-refund-note">
+              Refund accepted and recorded with this cancellation.
+            </p>
+<div class="hidden text-xs text-brand-subtle border-t border-brand-border/60 pt-2 space-y-1" id="w5-breakdown-details">
+<!-- Injected for updated amount -->
+</div>
+</div>
+<!-- Reference details card -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-2.5 text-xs">
+<div class="flex justify-between">
+<span class="text-brand-subtle">Cancellation ID:</span>
+<span class="font-mono font-medium text-brand-charcoal">CN-80000610-X</span>
+</div>
+<div class="flex justify-between">
+<span class="text-brand-subtle">Original Booking ID:</span>
+<span class="font-mono text-brand-charcoal">80000610</span>
+</div>
+<div class="flex justify-between">
+<span class="text-brand-subtle">Cancellation timestamp:</span>
+<span class="text-brand-charcoal font-medium" id="w5-timestamp">Just now</span>
+</div>
+</div>
+<!-- Help prompt link -->
+<div class="text-center pt-1">
+<button class="text-xs text-brand-teal hover:underline font-medium inline-flex items-center gap-1" id="w5-get-help-btn" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              Get help with this booking
+            </button>
+</div>
+</div>
+<div class="pt-6 pb-2">
+<button class="touch-press w-full py-3.5 px-4 rounded-xl bg-brand-deep hover:bg-brand-deepHover text-brand-mint font-semibold text-sm transition-colors shadow-md flex items-center justify-center" id="w5-back-to-my-bookings" type="button">
+            Back to My bookings
+          </button>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- SCREEN 6: W6 - ATTENTION RECOVERY              -->
+<!-- ============================================== -->
+<section class="screen-view hidden-screen w-full h-full flex-col overflow-y-auto mobile-screen-scroll bg-brand-ivory p-5 justify-between" data-purpose="w6-attention-recovery" id="screen-w6">
+<div class="space-y-5 pt-3">
+<!-- Attention Icon -->
+<div class="flex flex-col items-center text-center space-y-3 pt-4">
+<div class="w-16 h-16 rounded-full bg-status-amberBg border border-status-amberBorder flex items-center justify-center text-status-amber" id="w6-icon-wrap">
+<svg class="w-8 h-8" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+</div>
+<div>
+<span class="text-xs font-semibold uppercase tracking-wider text-status-amber" id="w6-badge">Attention Needed</span>
+<h2 class="font-serif text-2xl font-bold text-brand-deep mt-0.5" id="w6-title">Status unclear</h2>
+<p class="text-xs text-brand-subtle mt-2 leading-relaxed px-2" id="w6-body">
+                We couldn't verify the final cancellation status with the hotel reservation desk.
+              </p>
+</div>
+</div>
+<!-- Context Card -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-2 text-xs">
+<div class="flex justify-between">
+<span class="text-brand-subtle">Hotel:</span>
+<span class="font-medium text-brand-charcoal">Azure Palms Resort &amp; Spa</span>
+</div>
+<div class="flex justify-between">
+<span class="text-brand-subtle">Booking ID:</span>
+<span class="font-mono text-brand-charcoal">80000610</span>
+</div>
+<div class="flex justify-between">
+<span class="text-brand-subtle">Status check:</span>
+<span class="font-medium text-status-amber" id="w6-status-indicator">Verification pending</span>
+</div>
+</div>
+</div>
+<!-- Dynamic Action Buttons -->
+<div class="space-y-2.5 pb-2 pt-4" id="w6-action-buttons">
+<!-- Injected dynamically based on substate a, b, or c -->
+</div>
+</section>
+<!-- ============================================== -->
+<!-- SCREEN 7: W7 - SUPPORT REQUEST                 -->
+<!-- ============================================== -->
+<section class="screen-view hidden-screen w-full h-full flex-col overflow-y-auto mobile-screen-scroll bg-brand-ivory pb-8" data-purpose="w7-support-request" id="screen-w7">
+<!-- Top App Bar -->
+<div class="sticky top-0 bg-brand-ivory/95 backdrop-blur-sm z-20 px-4 py-3 border-b border-brand-border/70 flex items-center justify-between">
+<button class="touch-press p-2 -ml-2 rounded-full hover:bg-brand-ivoryAlt text-brand-deep" id="w7-back-btn" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+</button>
+<span class="font-medium text-sm text-brand-charcoal">Staymint Priority Support</span>
+<div class="w-8"></div>
+</div>
+<div class="p-5 space-y-4">
+<div>
+<h2 class="font-serif text-2xl font-bold text-brand-deep">Request cancellation help</h2>
+<p class="text-xs text-brand-subtle mt-0.5">Our concierge team will verify and resolve this with the hotel directly.</p>
+</div>
+<!-- Pre-filled Booking Context Card -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-2.5 text-xs">
+<div class="flex items-center justify-between">
+<span class="text-brand-subtle uppercase text-[10px] font-semibold tracking-wider">Associated reservation</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-brand-mint text-brand-deep">Booking #80000610</span>
+</div>
+<div class="font-serif text-base font-bold text-brand-deep">Azure Palms Resort &amp; Spa, Goa</div>
+<div class="text-brand-subtle flex justify-between pt-1 border-t border-brand-border/50">
+<span>Dates: 27 Nov – 29 Nov 2026</span>
+<span>Guest: Aarav Sharma</span>
+</div>
+</div>
+<!-- Form Area -->
+<div class="bg-white rounded-2xl border border-brand-border shadow-softCard p-4 space-y-3.5" id="w7-form-container">
+<div>
+<label class="text-xs font-semibold uppercase tracking-wider text-brand-subtle block mb-1.5">Issue category</label>
+<div class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-ivoryAlt border border-brand-border text-xs font-semibold text-brand-deep">
+                Cancellation Assistance
+              </div>
+</div>
+<div>
+<label class="text-xs font-semibold uppercase tracking-wider text-brand-subtle block mb-1" for="w7-notes-input">
+                Additional notes <span class="text-[11px] font-normal normal-case text-brand-subtle">(Optional)</span>
+</label>
+<textarea class="w-full text-xs rounded-xl border-brand-border focus:border-brand-teal focus:ring-brand-teal bg-brand-ivory/50 text-brand-charcoal p-2.5 placeholder-zinc-400" id="w7-notes-input" placeholder="Let us know if you require a call or specific timeline assistance..." rows="3"></textarea>
+</div>
+<button class="touch-press w-full py-3.5 px-4 rounded-xl bg-brand-deep hover:bg-brand-deepHover text-brand-mint font-semibold text-xs transition-colors shadow" id="w7-submit-btn" type="button">
+              Submit support request
+            </button>
+</div>
+<!-- Submission Confirmation Card (Initially hidden) -->
+<div class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-5 space-y-3" id="w7-success-container">
+<div class="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
+<svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+<span>Request submitted successfully</span>
+</div>
+<p class="text-xs text-emerald-700 leading-relaxed">
+              Our priority guest operations team is reviewing your booking. You will receive an update by SMS and email within 30 minutes.
+            </p>
+<div class="text-[11px] font-mono text-emerald-800 bg-emerald-100/70 p-2 rounded-lg">
+              Reference: <strong>SR-80000610-91</strong>
+</div>
+<div class="pt-2">
+<button class="touch-press w-full py-3 rounded-xl bg-brand-deep text-brand-mint text-xs font-semibold" id="w7-return-btn" type="button">
+                Back to booking
+              </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- END: ViewportScreenManager -->
+<!-- BEGIN: AndroidSystemNavigationBar -->
+<div class="h-6 w-full bg-brand-ivory flex items-center justify-center shrink-0 border-t border-brand-border/40 z-30">
+<div class="w-32 h-1 bg-zinc-400/80 rounded-full"></div>
+</div>
+<!-- END: AndroidSystemNavigationBar -->
+</main>
+</div>
+<!-- END: AndroidDeviceFrame -->
+<!-- BEGIN: InteractivePrototypeScript -->
+<script data-purpose="prototype-state-machine">
+    (function() {
+      // -------------------------------------------------------------
+      // Synthetic State Store
+      // -------------------------------------------------------------
+      const store = {
+        currentScenario: 1,
+        activeScreen: 'w1',
+        isAzureCancelled: false,
+        timeoutTimerId: null,
+        selectedReason: null,
+        lastKnownW2Mode: 'normal', // 'normal', 'already_cancelled', 'unavailable'
+        refundUpdated: false
+      };
+
+      // -------------------------------------------------------------
+      // DOM Elements Cache
+      // -------------------------------------------------------------
+      const screens = {
+        w1: document.getElementById('screen-w1'),
+        w2: document.getElementById('screen-w2'),
+        w3: document.getElementById('screen-w3'),
+        w4: document.getElementById('screen-w4'),
+        w5: document.getElementById('screen-w5'),
+        w6: document.getElementById('screen-w6'),
+        w7: document.getElementById('screen-w7')
+      };
+
+      // W1 Elements
+      const w1UpcomingCard = document.getElementById('w1-upcoming-card');
+      const w1PastCard = document.getElementById('w1-past-card');
+      const w1AzureStatusChip = document.getElementById('w1-azure-status-chip');
+
+      // W2 Elements
+      const w2BackBtn = document.getElementById('w2-back-btn');
+      const w2StatusPill = document.getElementById('w2-status-pill');
+      const w2BannerContainer = document.getElementById('w2-banner-container');
+      const w2PolicyCard = document.getElementById('w2-policy-card');
+      const w2PolicyText = document.getElementById('w2-policy-text');
+      const w2ActionContainer = document.getElementById('w2-action-container');
+      const w2StartCancelBtn = document.getElementById('w2-start-cancel-btn');
+
+      // W3 Elements
+      const w3BackBtn = document.getElementById('w3-back-btn');
+      const w3AlertBanner = document.getElementById('w3-alert-banner');
+      const w3RefundAmount = document.getElementById('w3-refund-amount');
+      const w3RefundSubtext = document.getElementById('w3-refund-subtext');
+      const w3ZeroWarning = document.getElementById('w3-zero-warning');
+      const w3FeeBreakdown = document.getElementById('w3-fee-breakdown');
+      const w3ConfirmCancelBtn = document.getElementById('w3-confirm-cancel-btn');
+      const w3KeepBookingBtn = document.getElementById('w3-keep-booking-btn');
+      const reasonChips = document.querySelectorAll('.reason-chip');
+
+      // W4 Elements
+      const w4Caption = document.getElementById('w4-caption');
+      const w4Subbody = document.getElementById('w4-subbody');
+      const w4TimeoutActions = document.getElementById('w4-timeout-actions');
+      const w4BackBookingsBtn = document.getElementById('w4-back-bookings-btn');
+      const w4SupportBtn = document.getElementById('w4-support-btn');
+
+      // W5 Elements
+      const w5RefundAmount = document.getElementById('w5-refund-amount');
+      const w5RefundNote = document.getElementById('w5-refund-note');
+      const w5BreakdownDetails = document.getElementById('w5-breakdown-details');
+      const w5BackToMyBookings = document.getElementById('w5-back-to-my-bookings');
+      const w5GetHelpBtn = document.getElementById('w5-get-help-btn');
+      const w5Timestamp = document.getElementById('w5-timestamp');
+
+      // W6 Elements
+      const w6Badge = document.getElementById('w6-badge');
+      const w6Title = document.getElementById('w6-title');
+      const w6Body = document.getElementById('w6-body');
+      const w6StatusIndicator = document.getElementById('w6-status-indicator');
+      const w6ActionButtons = document.getElementById('w6-action-buttons');
+
+      // W7 Elements
+      const w7BackBtn = document.getElementById('w7-back-btn');
+      const w7SubmitBtn = document.getElementById('w7-submit-btn');
+      const w7FormContainer = document.getElementById('w7-form-container');
+      const w7SuccessContainer = document.getElementById('w7-success-container');
+      const w7ReturnBtn = document.getElementById('w7-return-btn');
+      const w7NotesInput = document.getElementById('w7-notes-input');
+
+      // Controls
+      const scenarioButtons = document.querySelectorAll('.scenario-btn');
+      const currentScenarioIndicator = document.getElementById('current-scenario-indicator');
+      const resetScenarioBtn = document.getElementById('reset-scenario-btn');
+
+      // -------------------------------------------------------------
+      // Navigation & Screen View Controller
+      // -------------------------------------------------------------
+      function navigateTo(screenKey) {
+        clearTimeouts();
+        Object.keys(screens).forEach(key => {
+          if (key === screenKey) {
+            screens[key].classList.remove('hidden-screen');
+            screens[key].classList.add('active-screen');
+          } else {
+            screens[key].classList.remove('active-screen');
+            screens[key].classList.add('hidden-screen');
+          }
+        });
+        store.activeScreen = screenKey;
+      }
+
+      function clearTimeouts() {
+        if (store.timeoutTimerId) {
+          clearTimeout(store.timeoutTimerId);
+          store.timeoutTimerId = null;
+        }
+      }
+
+      // -------------------------------------------------------------
+      // Screen Setup & Render Helpers
+      // -------------------------------------------------------------
+      function setupW2View(mode) {
+        store.lastKnownW2Mode = mode;
+        w2BannerContainer.classList.add('hidden');
+        w2BannerContainer.innerHTML = '';
+
+        if (mode === 'already_cancelled' || store.isAzureCancelled) {
+          w2StatusPill.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200";
+          w2StatusPill.innerText = "Cancelled";
+          w2PolicyText.innerText = "This booking was cancelled. No further action is required.";
+          w2PolicyText.className = "text-xs text-brand-subtle italic";
+          w2ActionContainer.innerHTML = `
+            <div class="text-center p-3 rounded-xl bg-brand-ivoryAlt border border-brand-border text-xs text-brand-subtle font-medium">
+              This reservation has been cancelled.
+            </div>
+          `;
+        } else if (mode === 'unavailable') {
+          w2StatusPill.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-mint text-brand-deep border border-brand-mint";
+          w2StatusPill.innerText = "Confirmed";
+          w2PolicyText.innerText = "Free cancellation period has ended. Online self-service is closed.";
+          
+          w2BannerContainer.className = "p-3.5 rounded-2xl bg-status-brickBg border border-status-brickBorder text-status-brick flex flex-col gap-2";
+          w2BannerContainer.innerHTML = `
+            <div class="flex items-start gap-2 text-xs">
+              <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span><strong>Online cancellation is no longer available</strong> for this booking. Please contact our concierge support team for special accommodation.</span>
+            </div>
+          `;
+          w2BannerContainer.classList.remove('hidden');
+
+          w2ActionContainer.innerHTML = `
+            <button id="w2-unavailable-support-btn" type="button" class="touch-press w-full py-3.5 px-4 rounded-xl bg-brand-deep hover:bg-brand-deepHover text-brand-mint font-semibold text-sm transition-colors shadow-md flex items-center justify-center gap-2">
+              Contact support
+            </button>
+          `;
+          document.getElementById('w2-unavailable-support-btn').addEventListener('click', () => {
+            navigateTo('w7');
+          });
+        } else {
+          // Normal Active state
+          w2StatusPill.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-mint text-brand-deep border border-brand-mint shadow-sm";
+          w2StatusPill.innerText = "Confirmed";
+          w2PolicyText.innerText = "Free cancellation before Wed 25 Nov 2026, 23:59 (hotel local time). Cancellations after this time are not refundable.";
+          w2PolicyText.className = "text-xs text-brand-subtle leading-relaxed";
+          w2ActionContainer.innerHTML = `
+            <button id="w2-start-cancel-btn" type="button" class="touch-press w-full py-3.5 px-4 rounded-xl bg-brand-deep hover:bg-brand-deepHover text-brand-mint font-semibold text-sm transition-colors shadow-md flex items-center justify-center gap-2">
+              Review cancellation
+            </button>
+          `;
+          document.getElementById('w2-start-cancel-btn').addEventListener('click', onStartCancellationFlow);
+        }
+      }
+
+      function setupW3View() {
+        // Reset selections
+        store.selectedReason = null;
+        reasonChips.forEach(chip => {
+          chip.classList.remove('bg-brand-deep', 'text-brand-mint', 'border-brand-deep', 'font-semibold');
+          chip.classList.add('text-brand-charcoal', 'border-brand-border');
+        });
+
+        // Configure based on Scenario
+        if (store.currentScenario === 2) {
+          // Zero refund scenario
+          w3AlertBanner.classList.add('hidden');
+          w3RefundAmount.innerText = "Rs 0";
+          w3RefundSubtext.innerText = "Non-refundable terms in effect";
+          w3RefundSubtext.className = "text-xs text-status-brick block font-medium mt-0.5";
+          w3ZeroWarning.classList.remove('hidden');
+          w3FeeBreakdown.classList.add('hidden');
+          w3ConfirmCancelBtn.innerText = "Cancel without refund";
+        } else if (store.currentScenario === 3 && store.refundUpdated) {
+          // Updated refund scenario (after mismatch re-check)
+          w3AlertBanner.className = "p-3 rounded-xl bg-status-amberBg border border-status-amberBorder text-xs text-amber-900 flex items-start gap-2";
+          w3AlertBanner.innerHTML = `
+            <svg class="w-4 h-4 shrink-0 text-amber-700 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <strong class="font-semibold block">The refund has changed: Rs 16,990 (was Rs 21,240)</strong>
+              <span>A cancellation charge of Rs 4,250 now applies to this booking per latest hotel rate tier.</span>
+            </div>
+          `;
+          w3AlertBanner.classList.remove('hidden');
+          w3RefundAmount.innerText = "Rs 16,990";
+          w3RefundSubtext.innerText = "Partial refund after cancellation fee";
+          w3RefundSubtext.className = "text-xs text-amber-800 block font-medium mt-0.5";
+          w3ZeroWarning.classList.add('hidden');
+          w3FeeBreakdown.classList.remove('hidden');
+          w3ConfirmCancelBtn.innerText = "Confirm cancellation (Rs 16,990)";
+        } else {
+          // Standard full refund (Scenario 1, 4, 5, 6 etc.)
+          w3AlertBanner.classList.add('hidden');
+          w3RefundAmount.innerText = "Rs 21,240";
+          w3RefundSubtext.innerText = "100% of amount paid (Rs 21,240)";
+          w3RefundSubtext.className = "text-xs text-emerald-700 block font-medium mt-0.5";
+          w3ZeroWarning.classList.add('hidden');
+          w3FeeBreakdown.classList.add('hidden');
+          w3ConfirmCancelBtn.innerText = "Confirm cancellation";
+        }
+      }
+
+      function setupW5View() {
+        store.isAzureCancelled = true;
+        // Update W1 Chip
+        w1AzureStatusChip.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200 flex items-center gap-1";
+        w1AzureStatusChip.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span> Cancelled`;
+
+        w5Timestamp.innerText = (store.currentScenario === 2 || store.currentScenario === 3) ? "26 Nov 2026" : "24 Nov 2026";
+
+        if (store.currentScenario === 2) {
+          // Zero refund variant
+          w5RefundAmount.innerText = "Rs 0";
+          w5RefundNote.innerText = "No refund applies for this cancellation as per booking terms.";
+          w5BreakdownDetails.classList.add('hidden');
+        } else if (store.currentScenario === 3) {
+          // Updated refund variant
+          w5RefundAmount.innerText = "Rs 16,990";
+          w5RefundNote.innerText = "Refund accepted and recorded with this cancellation.";
+          w5BreakdownDetails.classList.remove('hidden');
+          w5BreakdownDetails.innerHTML = `
+            <div class="flex justify-between"><span>Original payment</span><span>Rs 21,240</span></div>
+            <div class="flex justify-between text-status-brick"><span>Cancellation charge</span><span>- Rs 4,250</span></div>
+            <div class="flex justify-between font-semibold text-brand-deep pt-1 border-t border-brand-border/40">
+              <span>Total refund credit</span><span>Rs 16,990</span>
+            </div>
+          `;
+        } else {
+          // Standard Rs 21,240
+          w5RefundAmount.innerText = "Rs 21,240";
+          w5RefundNote.innerText = "Refund accepted and recorded with this cancellation.";
+          w5BreakdownDetails.classList.add('hidden');
+        }
+      }
+
+      function setupW6View(substate) {
+        if (substate === 'a') {
+          // Scenario 7: Preview Failure
+          w6Badge.innerText = "Service Notice";
+          w6Badge.className = "text-xs font-semibold uppercase tracking-wider text-status-brick";
+          w6Title.innerText = "Couldn't load cancellation options";
+          w6Body.innerText = "A secure connection to the property reservation engine could not be established. Your booking remains active and unchanged.";
+          w6StatusIndicator.innerText = "Connection timeout";
+          w6StatusIndicator.className = "font-medium text-status-brick";
+          w6ActionButtons.innerHTML = `
+            <button id="w6a-retry-btn" type="button" class="touch-press w-full py-3.5 rounded-xl bg-brand-deep text-brand-mint font-semibold text-xs shadow">
+              Retry
+            </button>
+            <button id="w6a-support-btn" type="button" class="touch-press w-full py-3 rounded-xl bg-brand-ivoryAlt text-brand-deep font-semibold text-xs border border-brand-border">
+              Contact support
+            </button>
+          `;
+          document.getElementById('w6a-retry-btn').addEventListener('click', () => {
+            // Rerun Preview (simulate success on retry for smooth reviewer flow)
+            startW4CaptionA(true);
+          });
+          document.getElementById('w6a-support-btn').addEventListener('click', () => {
+            navigateTo('w7');
+          });
+
+        } else if (substate === 'b') {
+          // Scenario 5: Booking still active
+          w6Badge.innerText = "Cancellation Unconfirmed";
+          w6Badge.className = "text-xs font-semibold uppercase tracking-wider text-amber-700";
+          w6Title.innerText = "Cancellation not confirmed";
+          w6Body.innerText = "We couldn't confirm the cancellation. The latest status check shows your booking is still active.";
+          w6StatusIndicator.innerText = "Confirmed (Still active)";
+          w6StatusIndicator.className = "font-medium text-emerald-700";
+          w6ActionButtons.innerHTML = `
+            <button id="w6b-tryagain-btn" type="button" class="touch-press w-full py-3.5 rounded-xl bg-brand-deep text-brand-mint font-semibold text-xs shadow">
+              Try again
+            </button>
+            <button id="w6b-support-btn" type="button" class="touch-press w-full py-3 rounded-xl bg-brand-ivoryAlt text-brand-deep font-semibold text-xs border border-brand-border">
+              Contact support
+            </button>
+          `;
+          document.getElementById('w6b-tryagain-btn').addEventListener('click', () => {
+            // Fresh preview fetch then review
+            startW4CaptionA(true);
+          });
+          document.getElementById('w6b-support-btn').addEventListener('click', () => {
+            navigateTo('w7');
+          });
+
+        } else if (substate === 'c') {
+          // Scenario 6: Status unclear
+          w6Badge.innerText = "Manual Verification Required";
+          w6Badge.className = "text-xs font-semibold uppercase tracking-wider text-status-amber";
+          w6Title.innerText = "Status unclear";
+          w6Body.innerText = "We still couldn't confirm whether the cancellation went through. Please continue with support so we can verify it for you.";
+          w6StatusIndicator.innerText = "Pending property verification";
+          w6StatusIndicator.className = "font-medium text-status-amber";
+          w6ActionButtons.innerHTML = `
+            <button id="w6c-support-btn" type="button" class="touch-press w-full py-3.5 rounded-xl bg-brand-deep text-brand-mint font-semibold text-xs shadow">
+              Contact support
+            </button>
+            <button id="w6c-mybookings-btn" type="button" class="touch-press w-full py-3 rounded-xl bg-brand-ivoryAlt text-brand-deep font-semibold text-xs border border-brand-border">
+              Back to My bookings
+            </button>
+          `;
+          document.getElementById('w6c-support-btn').addEventListener('click', () => {
+            navigateTo('w7');
+          });
+          document.getElementById('w6c-mybookings-btn').addEventListener('click', () => {
+            navigateTo('w1');
+          });
+        }
+      }
+
+      function setupW7View() {
+        w7NotesInput.value = '';
+        w7FormContainer.classList.remove('hidden');
+        w7SuccessContainer.classList.add('hidden');
+      }
+
+      // -------------------------------------------------------------
+      // Progress Screen (W4) Logic
+      // -------------------------------------------------------------
+      function startW4CaptionA(forceSuccess = false) {
+        navigateTo('w4');
+        w4Caption.innerText = "Getting your cancellation options...";
+        w4Subbody.innerText = "";
+        w4TimeoutActions.classList.add('hidden');
+
+        store.timeoutTimerId = setTimeout(() => {
+          if (store.currentScenario === 7 && !forceSuccess) {
+            setupW6View('a');
+            navigateTo('w6');
+          } else {
+            setupW3View();
+            navigateTo('w3');
+          }
+        }, 1200);
+      }
+
+      function startW4CaptionB() {
+        navigateTo('w4');
+        w4Caption.innerText = "Cancelling your booking...";
+        w4Subbody.innerText = "";
+        w4TimeoutActions.classList.add('hidden');
+
+        const isTimeoutScenario = [4, 5, 6].includes(store.currentScenario);
+
+        if (!isTimeoutScenario) {
+          // Standard direct resolution
+          store.timeoutTimerId = setTimeout(() => {
+            setupW5View();
+            navigateTo('w5');
+          }, 1400);
+        } else {
+          // Transitions to Caption C after 1.4s
+          store.timeoutTimerId = setTimeout(() => {
+            startW4CaptionC();
+          }, 1400);
+        }
+      }
+
+      function startW4CaptionC() {
+        w4Caption.innerText = "Checking the status of your cancellation...";
+        w4Subbody.innerText = "This can take a few moments. You don't need to stay on this screen.";
+        w4TimeoutActions.classList.remove('hidden');
+
+        store.timeoutTimerId = setTimeout(() => {
+          if (store.currentScenario === 4) {
+            // Timeout Resolved -> W5
+            setupW5View();
+            navigateTo('w5');
+          } else if (store.currentScenario === 5) {
+            // Timeout Active -> W6b
+            setupW6View('b');
+            navigateTo('w6');
+          } else if (store.currentScenario === 6) {
+            // Timeout Unresolved -> W6c
+            setupW6View('c');
+            navigateTo('w6');
+          }
+        }, 2200);
+      }
+
+      function onStartCancellationFlow() {
+        startW4CaptionA();
+      }
+
+      // -------------------------------------------------------------
+      // Scenario Reset & Selection Handler
+      // -------------------------------------------------------------
+      function applyScenario(scenarioNumber) {
+        store.currentScenario = scenarioNumber;
+        store.isAzureCancelled = false;
+        store.refundUpdated = false;
+        clearTimeouts();
+
+        // Update pills styling
+        scenarioButtons.forEach(btn => {
+          const num = parseInt(btn.getAttribute('data-scenario'), 10);
+          if (num === scenarioNumber) {
+            btn.className = "scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-brand-deep text-brand-mint border-brand-mint/40 shadow-sm";
+          } else {
+            btn.className = "scenario-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-zinc-900/80 text-zinc-300 border-zinc-700 hover:border-zinc-500";
+          }
+        });
+
+        // Scenario label indicator
+        const titles = {
+          1: "Scenario 1: Standard Success (Rs 21,240)",
+          2: "Scenario 2: Zero Refund (Rs 0)",
+          3: "Scenario 3: Updated Refund (Rs 16,990)",
+          4: "Scenario 4: Timeout Resolved (W4C → W5)",
+          5: "Scenario 5: Timeout Active (W4C → W6b)",
+          6: "Scenario 6: Timeout Unresolved (W4C → W6c)",
+          7: "Scenario 7: Preview Failure (W4A → W6a)",
+          8: "Scenario 8: Already Cancelled",
+          9: "Scenario 9: Cancellation Unavailable"
+        };
+        currentScenarioIndicator.innerText = titles[scenarioNumber] || `Scenario ${scenarioNumber}`;
+
+        // Reset W1 Azure card state
+        w1AzureStatusChip.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-mint text-brand-deep border border-brand-mint/80 shadow-sm flex items-center gap-1";
+        w1AzureStatusChip.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-brand-deep"></span> Confirmed`;
+
+        // Configure Initial Screen based on Scenario
+        if (scenarioNumber === 8) {
+          // Scenario 8: Already cancelled
+          store.isAzureCancelled = true;
+          w1AzureStatusChip.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 border border-zinc-200 flex items-center gap-1";
+          w1AzureStatusChip.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span> Cancelled`;
+          setupW2View('already_cancelled');
+          navigateTo('w1');
+        } else if (scenarioNumber === 9) {
+          // Scenario 9: Cancellation Unavailable
+          setupW2View('unavailable');
+          navigateTo('w1');
+        } else {
+          // Scenarios 1-7: Normal active booking
+          setupW2View('normal');
+          navigateTo('w1');
+        }
+      }
+
+      // -------------------------------------------------------------
+      // Event Listeners
+      // -------------------------------------------------------------
+      // Top Reviewer Bar Scenario Selection
+      scenarioButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sNum = parseInt(btn.getAttribute('data-scenario'), 10);
+          applyScenario(sNum);
+        });
+      });
+
+      resetScenarioBtn.addEventListener('click', () => {
+        applyScenario(store.currentScenario);
+      });
+
+      // Screen W1: My Bookings
+      w1UpcomingCard.addEventListener('click', () => {
+        if (store.currentScenario === 8 || store.isAzureCancelled) {
+          setupW2View('already_cancelled');
+        } else if (store.currentScenario === 9) {
+          setupW2View('unavailable');
+        } else {
+          setupW2View('normal');
+        }
+        navigateTo('w2');
+      });
+
+      w1PastCard.addEventListener('click', () => {
+        // Tapping past card opens W2 in read-only already cancelled state for Silver Oaks
+        setupW2View('already_cancelled');
+        navigateTo('w2');
+      });
+
+      // Screen W2: Booking Details
+      w2BackBtn.addEventListener('click', () => {
+        navigateTo('w1');
+      });
+
+      // Screen W3: Review Cancellation
+      w3BackBtn.addEventListener('click', () => {
+        navigateTo('w2');
+      });
+
+      w3KeepBookingBtn.addEventListener('click', () => {
+        navigateTo('w2');
+      });
+
+      // Single select cancellation reason chips
+      reasonChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const reasonText = chip.innerText.trim();
+          if (store.selectedReason === reasonText) {
+            // Deselect
+            store.selectedReason = null;
+            chip.classList.remove('bg-brand-deep', 'text-brand-mint', 'border-brand-deep', 'font-semibold');
+            chip.classList.add('text-brand-charcoal', 'border-brand-border');
+          } else {
+            // Select single
+            reasonChips.forEach(c => {
+              c.classList.remove('bg-brand-deep', 'text-brand-mint', 'border-brand-deep', 'font-semibold');
+              c.classList.add('text-brand-charcoal', 'border-brand-border');
+            });
+            store.selectedReason = reasonText;
+            chip.classList.add('bg-brand-deep', 'text-brand-mint', 'border-brand-deep', 'font-semibold');
+            chip.classList.remove('text-brand-charcoal', 'border-brand-border');
+          }
+        });
+      });
+
+      w3ConfirmCancelBtn.addEventListener('click', () => {
+        if (store.currentScenario === 3 && !store.refundUpdated) {
+          // First confirm at the old amount hits a refund mismatch: re-check, then ask again
+          navigateTo('w4');
+          w4Caption.innerText = "Cancelling your booking...";
+          w4Subbody.innerText = "";
+          w4TimeoutActions.classList.add('hidden');
+          store.timeoutTimerId = setTimeout(() => {
+            store.refundUpdated = true;
+            setupW3View();
+            navigateTo('w3');
+          }, 1400);
+        } else {
+          startW4CaptionB();
+        }
+      });
+
+      // Screen W4: Progress actions
+      w4BackBookingsBtn.addEventListener('click', () => {
+        clearTimeouts();
+        navigateTo('w1');
+      });
+
+      w4SupportBtn.addEventListener('click', () => {
+        clearTimeouts();
+        setupW7View();
+        navigateTo('w7');
+      });
+
+      // Screen W5: Confirmed
+      w5BackToMyBookings.addEventListener('click', () => {
+        navigateTo('w1');
+      });
+
+      w5GetHelpBtn.addEventListener('click', () => {
+        setupW7View();
+        navigateTo('w7');
+      });
+
+      // Screen W7: Support Form
+      w7BackBtn.addEventListener('click', () => {
+        // Return to last known view
+        if (store.isAzureCancelled) {
+          navigateTo('w5');
+        } else {
+          navigateTo('w2');
+        }
+      });
+
+      w7SubmitBtn.addEventListener('click', () => {
+        w7FormContainer.classList.add('hidden');
+        w7SuccessContainer.classList.remove('hidden');
+      });
+
+      w7ReturnBtn.addEventListener('click', () => {
+        if (store.isAzureCancelled) {
+          setupW2View('already_cancelled');
+        } else if (store.currentScenario === 9) {
+          setupW2View('unavailable');
+        } else {
+          setupW2View('normal');
+        }
+        navigateTo('w2');
+      });
+
+      // Realtime Clock Display in Android Status Bar
+      function updateClock() {
+        const d = new Date();
+        const hrs = d.getHours().toString().padStart(2, '0');
+        const mins = d.getMinutes().toString().padStart(2, '0');
+        const clockEl = document.getElementById('status-clock');
+        if (clockEl) clockEl.innerText = `${hrs}:${mins}`;
+      }
+      setInterval(updateClock, 10000);
+      updateClock();
+
+      // Initial Boot
+      applyScenario(1);
+
+    })();
+  </script>
+<!-- END: InteractivePrototypeScript -->
+<script>
+(function(){
+  function fitPhone(){
+    var scaler=document.getElementById('phone-scaler');
+    var phone=document.querySelector('.android-viewport');
+    if(!scaler||!phone) return;
+    if(window.innerWidth<=560){ phone.style.transform=''; scaler.style.height=''; return; }
+    var header=document.querySelector('header');
+    var hb=header?header.getBoundingClientRect().bottom:0;
+    var availH=window.innerHeight-hb-60;
+    var availW=Math.min(window.innerWidth-24,1152);
+    var s=Math.min(1,availH/929,availW/426);
+    if(s<0.45)s=0.45;
+    phone.style.transform='scale('+s+')';
+    scaler.style.height=(929*s)+'px';
+  }
+  window.addEventListener('resize',fitPhone);
+  window.addEventListener('load',fitPhone);
+  fitPhone();
+})();
+</script>
+</body></html>
